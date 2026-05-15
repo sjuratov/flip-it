@@ -171,3 +171,13 @@
   margin-left: 0.4rem;
   white-space: nowrap;
 }
+
+.results-item-difficulty {
+  margin-left: auto;
+  color: var(--color-primary);
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}

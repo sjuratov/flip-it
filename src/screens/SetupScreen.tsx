@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Category, GameConfig } from '../types';
+import type { Category, DifficultySelection, GameConfig } from '../types';
 import { categories as allCategories } from '../data/categories';
 import './SetupScreen.css';
 
@@ -12,6 +12,32 @@ const TIMER_OPTIONS = [
 
 const TEAM_OPTIONS = [2, 3, 4];
 const PLAYER_OPTIONS = [2, 3, 4, 5, 6];
+const DIFFICULTY_OPTIONS: Array<{
+  value: DifficultySelection;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: 'family',
+    label: 'Family Fun',
+    description: 'Easy, kid-friendly phrases everyone knows.',
+  },
+  {
+    value: 'brain-burn',
+    label: 'Brain Burn',
+    description: 'Harder phrases for adults and confident players.',
+  },
+  {
+    value: 'genius',
+    label: 'Genius Mode',
+    description: 'Obscure, clever, and expert-level clues.',
+  },
+  {
+    value: 'chaos',
+    label: 'Chaos Mix',
+    description: 'A funny random mix from all difficulty levels.',
+  },
+];
 
 function createTeams(count: number) {
   return Array.from({ length: count }, (_, index) => ({
@@ -32,6 +58,7 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
   );
   const [teams, setTeams] = useState(createTeams(2));
   const [timerDuration, setTimerDuration] = useState(60);
+  const [difficulty, setDifficulty] = useState<DifficultySelection>('chaos');
 
   const toggleCategory = (id: string) => {
     setSelectedCategoryIds((prev) => {
@@ -85,6 +112,7 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
     onStart({
       categories: selectedCategories,
       timerDuration,
+      difficulty,
       teams: teams.map((team, index) => ({
         ...team,
         name: team.name.trim() || `Team ${index + 1}`,
@@ -112,6 +140,24 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
             >
               <span className="category-icon">{cat.icon}</span>
               <span className="category-name">{cat.name}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="setup-section">
+        <h3>Difficulty</h3>
+        <div className="difficulty-grid">
+          {DIFFICULTY_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              className={`difficulty-card ${difficulty === option.value ? 'selected' : ''}`}
+              onClick={() => setDifficulty(option.value)}
+            >
+              <span className="difficulty-name">{option.label}</span>
+              <span className="difficulty-description">
+                {option.description}
+              </span>
             </button>
           ))}
         </div>

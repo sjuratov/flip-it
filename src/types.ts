@@ -1,19 +1,30 @@
+export type Difficulty = 'family' | 'brain-burn' | 'genius';
+
+export type DifficultySelection = Difficulty | 'chaos';
+
+export interface Phrase {
+  text: string;
+  difficulty: Difficulty;
+}
+
 export interface Category {
   id: string;
   name: string;
   icon: string;
-  phrases: string[];
+  phrases: Phrase[];
 }
 
 export interface GameConfig {
   categories: Category[];
   timerDuration: number; // seconds
   teams: Team[];
+  difficulty: DifficultySelection;
 }
 
 export interface AnswerResult {
   phrase: string;
   category: string;
+  difficulty: Difficulty;
   correct: boolean;
 }
 

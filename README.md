@@ -8,13 +8,25 @@ Works in any browser, installable on iOS and Android as a PWA — no app store n
 
 1. **Create teams** — 2–4 teams, with at least 2 players per team
 2. **Choose categories** — pick one or more from 15 available categories
-3. **Set the timer** — 30 seconds, 1 minute, 2 minutes, or 3 minutes
-4. **Take turns by team** — one player from the active team guesses, teammates describe
-5. **Guessed correctly?** Tilt the phone **down** ✅
-6. **Want to skip?** Tilt the phone **up** ❌
-7. **When time's up** — see the round score, phrase list, and match scoreboard
+3. **Choose difficulty** — Family Fun, Brain Burn, Genius Mode, or Chaos Mix
+4. **Set the timer** — 30 seconds, 1 minute, 2 minutes, or 3 minutes
+5. **Take turns by team** — one player from the active team guesses, teammates describe
+6. **Guessed correctly?** Tilt the phone **down** ✅
+7. **Want to skip?** Tilt the phone **up** ❌
+8. **When time's up** — see the round score, phrase list, and match scoreboard
 
 Scores accumulate across rounds and the active team rotates automatically.
+
+## 🧠 Difficulty Levels
+
+| Level | Best for | Description |
+|---|---|---|
+| **Family Fun** | Kids and mixed-age groups | Easy phrases almost everyone knows |
+| **Brain Burn** | Adults and confident players | Harder phrases that need better clues |
+| **Genius Mode** | Trivia lovers | Expert-level and more obscure phrases |
+| **Chaos Mix** | Maximum laughs | Random mix from all difficulty levels |
+ 
+Each category has a balanced spread of difficulty levels.
 
 ## 📂 Categories
 
@@ -78,6 +90,7 @@ Once installed, the app works **fully offline** — no internet needed after fir
 - 📱 Installable as a PWA on iOS and Android
 - 🔄 Tilt controls with iOS permission handling
 - ⏱️ Configurable round timer
+- 🧠 Difficulty selection: Family Fun, Brain Burn, Genius Mode, Chaos Mix
 - 🏆 2–4 team match mode with cumulative scores and round history
 - 🎯 Results screen with color-coded answers and category labels
 - 🎲 Randomized phrase order each round

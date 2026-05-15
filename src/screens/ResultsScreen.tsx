@@ -1,4 +1,4 @@
-import type { MatchState } from '../types';
+import type { Difficulty, MatchState } from '../types';
 import './ResultsScreen.css';
 
 interface ResultsScreenProps {
@@ -6,6 +6,12 @@ interface ResultsScreenProps {
   onNextRound: () => void;
   onResetMatch: () => void;
 }
+
+const DIFFICULTY_LABELS: Record<Difficulty, string> = {
+  family: 'Family Fun',
+  'brain-burn': 'Brain Burn',
+  genius: 'Genius Mode',
+};
 
 export function ResultsScreen({
   matchState,
@@ -84,6 +90,9 @@ export function ResultsScreen({
             </span>
             <span className="results-item-phrase">{r.phrase}</span>
             <span className="results-item-category">({r.category})</span>
+            <span className="results-item-difficulty">
+              {DIFFICULTY_LABELS[r.difficulty]}
+            </span>
           </div>
         ))}
       </div>

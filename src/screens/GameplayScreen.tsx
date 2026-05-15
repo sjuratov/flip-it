@@ -21,10 +21,20 @@ function shuffleArray<T>(arr: T[]): T[] {
 export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
   const phrasePool = useMemo(() => {
     const all = config.categories.flatMap((c) =>
-      c.phrases.map((phrase) => ({ phrase, category: c.name })),
+      c.phrases
+        .filter(
+          (phrase) =>
+            config.difficulty === 'chaos' ||
+            phrase.difficulty === config.difficulty,
+        )
+        .map((phrase) => ({
+          phrase: phrase.text,
+          category: c.name,
+          difficulty: phrase.difficulty,
+        })),
     );
     return shuffleArray(all);
-  }, [config.categories]);
+  }, [config.categories, config.difficulty]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<AnswerResult[]>([]);
@@ -41,7 +51,15 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
       if (isExpired) return;
 
       const current = phrasePool[currentIndex % phrasePool.length];
-      setResults((prev) => [...prev, { phrase: current.phrase, category: current.category, correct }]);
+      setResults((prev) => [
+        ...prev,
+        {
+          phrase: current.phrase,
+          category: current.category,
+          difficulty: current.difficulty,
+          correct,
+        },
+      ]);
       setFeedback(correct ? 'correct' : 'wrong');
 
       setTimeout(() => {

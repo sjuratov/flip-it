@@ -14,7 +14,16 @@ function loadSavedMatch(): MatchState | null {
   const saved = localStorage.getItem(MATCH_STORAGE_KEY);
   if (!saved) return null;
   try {
-    return JSON.parse(saved) as MatchState;
+    const match = JSON.parse(saved) as MatchState;
+    const hasDifficulty = Boolean(match.config?.difficulty);
+    const hasDifficultyPhrases = match.config?.categories?.every((category) =>
+      category.phrases.every((phrase) => typeof phrase !== 'string'),
+    );
+    if (!hasDifficulty || !hasDifficultyPhrases) {
+      localStorage.removeItem(MATCH_STORAGE_KEY);
+      return null;
+    }
+    return match;
   } catch {
     localStorage.removeItem(MATCH_STORAGE_KEY);
     return null;
