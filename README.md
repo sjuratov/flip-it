@@ -1,73 +1,92 @@
-# React + TypeScript + Vite
+# 🔄 Flip It!
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A fun party guessing game for 2–4 players. One player holds the phone on their forehead (screen facing outward) while the others describe the phrase shown on screen. Tilt down for correct, tilt up to pass!
 
-Currently, two official plugins are available:
+Works in any browser, installable on iOS and Android as a PWA — no app store needed.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🎮 How to Play
 
-## React Compiler
+1. **Choose categories** — pick one or more from 15 available categories
+2. **Set the timer** — 30 seconds, 1 minute, 2 minutes, or 3 minutes
+3. **Place the phone on your forehead** — screen facing outward so others can see
+4. **Other players describe the phrase** — without saying the actual words!
+5. **Guessed correctly?** Tilt the phone **down** ✅
+6. **Want to skip?** Tilt the phone **up** ❌
+7. **When time's up** — see your score and all the phrases you got right or wrong
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📂 Categories
 
-## Expanding the ESLint configuration
+| | Category | | Category |
+|---|---|---|---|
+| 🐾 | Animals | 🎮 | Video Games |
+| ⚽ | Sport | 📚 | Books & Stories |
+| 🎵 | Music | 🦸 | Superheroes & Cartoons |
+| 🎬 | Movies & TV | 🔬 | Science & Nature |
+| 🍕 | Food & Drink | 💼 | Jobs & Professions |
+| 🌍 | Geography | 🎉 | Holidays & Celebrations |
+| 🏠 | Everyday Life | 🌊 | Travel & Adventure |
+| 😂 | Funny & Silly | | |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+100 phrases per category — **1,500 phrases** in total!
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🚀 Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+```bash
+# Install dependencies
+npm install
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🛠 Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **React 19** + **TypeScript** — UI and game logic
+- **Vite** — fast dev server and bundler
+- **PWA** (vite-plugin-pwa) — installable, offline-capable
+- **Device Orientation API** — tilt detection on mobile
+- Desktop fallback with ✓ / ✗ buttons
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## ✨ Features
+
+- 🌙☀️ Dark and light theme with system preference detection
+- 📱 Installable as a PWA on iOS and Android
+- 🔄 Tilt controls with iOS permission handling
+- ⏱️ Configurable round timer
+- 🎯 Results screen with color-coded answers and category labels
+- 🎲 Randomized phrase order each round
+- 💾 Theme preference saved to localStorage
+
+## 📁 Project Structure
+
 ```
+src/
+├── App.tsx                  # Screen state machine
+├── types.ts                 # TypeScript interfaces
+├── main.tsx                 # Entry point
+├── data/                    # Category & phrase data (1,500 phrases)
+├── hooks/
+│   ├── useTheme.tsx         # Dark/light theme context
+│   ├── useTilt.ts           # Device orientation tilt detection
+│   └── useTimer.ts          # Countdown timer
+├── screens/
+│   ├── HomeScreen.tsx       # Landing page
+│   ├── SetupScreen.tsx      # Category & timer selection
+│   ├── ReadyScreen.tsx      # Countdown before round
+│   ├── GameplayScreen.tsx   # Main game loop
+│   ├── ResultsScreen.tsx    # Score & phrase review
+│   └── ThemeToggle.tsx      # Dark/light mode toggle
+└── styles/
+    └── global.css           # Theme variables & base styles
+```
+
+## 📄 License
+
+MIT
+
