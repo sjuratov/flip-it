@@ -15,9 +15,13 @@ export interface Category {
 }
 
 export interface GameConfig {
-  categories: Category[];
   timerDuration: number; // seconds
   teams: Team[];
+  roundsPerTeam: number;
+}
+
+export interface RoundConfig {
+  categories: Category[];
   difficulty: DifficultySelection;
 }
 
@@ -31,7 +35,6 @@ export interface AnswerResult {
 export interface Team {
   id: string;
   name: string;
-  playerCount: number;
 }
 
 export interface RoundResult {
@@ -44,9 +47,10 @@ export interface RoundResult {
 export interface MatchState {
   config: GameConfig;
   activeTeamIndex: number;
+  roundConfig: RoundConfig | null;
   rounds: RoundResult[];
 }
 
-export type Screen = 'home' | 'setup' | 'ready' | 'gameplay' | 'results';
+export type Screen = 'home' | 'setup' | 'round-setup' | 'ready' | 'gameplay' | 'results';
 
 export type TiltDirection = 'down' | 'up' | 'neutral';

@@ -3,6 +3,7 @@ import './ResultsScreen.css';
 
 interface ResultsScreenProps {
   matchState: MatchState;
+  isMatchComplete: boolean;
   onNextRound: () => void;
   onResetMatch: () => void;
 }
@@ -15,6 +16,7 @@ const DIFFICULTY_LABELS: Record<Difficulty, string> = {
 
 export function ResultsScreen({
   matchState,
+  isMatchComplete,
   onNextRound,
   onResetMatch,
 }: ResultsScreenProps) {
@@ -23,6 +25,9 @@ export function ResultsScreen({
   const correct = latestRound?.score ?? 0;
   const wrong = results.filter((r) => !r.correct).length;
   const nextTeam = matchState.config.teams[matchState.activeTeamIndex];
+  const totalRounds =
+    matchState.config.teams.length * matchState.config.roundsPerTeam;
+  const latestRoundNumber = matchState.rounds.length;
 
   const teamTotals = matchState.config.teams.map((team) => ({
     ...team,
@@ -30,15 +35,28 @@ export function ResultsScreen({
       .filter((round) => round.teamId === team.id)
       .reduce((sum, round) => sum + round.score, 0),
   }));
+  const highScore = Math.max(...teamTotals.map((team) => team.score));
+  const winners = teamTotals.filter((team) => team.score === highScore);
 
   return (
     <div className="results-screen">
-      <h2 className="results-title">Round Over!</h2>
+      <h2 className="results-title">
+        {isMatchComplete ? 'Final Results!' : 'Round Over!'}
+      </h2>
       {latestRound && (
         <p className="results-subtitle">
-          {latestRound.teamName} scored {latestRound.score} point
+          Round {latestRoundNumber} of {totalRounds}: {latestRound.teamName}{' '}
+          scored {latestRound.score} point
           {latestRound.score === 1 ? '' : 's'}
         </p>
+      )}
+
+      {isMatchComplete && (
+        <div className="winner-banner">
+          {winners.length === 1
+            ? `🏆 Winner: ${winners[0].name}`
+            : `🤝 Tie game: ${winners.map((team) => team.name).join(', ')}`}
+        </div>
       )}
 
       <div className="results-summary">
@@ -59,7 +77,10 @@ export function ResultsScreen({
             <div className="team-score-item" key={team.id}>
               <span>
                 {team.name}
-                <small>{team.playerCount} players</small>
+                <small>
+                  {matchState.rounds.filter((round) => round.teamId === team.id).length}
+                  /{matchState.config.roundsPerTeam} rounds played
+                </small>
               </span>
               <strong>{team.score}</strong>
             </div>
@@ -97,11 +118,13 @@ export function ResultsScreen({
         ))}
       </div>
 
-      <button className="btn btn-primary btn-large" onClick={onNextRound}>
-        Next Round: {nextTeam.name}
-      </button>
+      {!isMatchComplete && (
+        <button className="btn btn-primary btn-large" onClick={onNextRound}>
+          Configure Next Round: {nextTeam.name}
+        </button>
+      )}
       <button className="btn btn-text" onClick={onResetMatch}>
-        Reset Match
+        {isMatchComplete ? 'New Match' : 'Reset Match'}
       </button>
     </div>
   );

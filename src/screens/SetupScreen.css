@@ -40,6 +40,19 @@
   line-height: 1.4;
 }
 
+.setup-callout {
+  padding: 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+
+.round-setup-team {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 900;
+}
+
 .category-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -193,18 +206,4 @@
 .team-name-input:focus {
   border-color: var(--color-primary);
   outline: none;
-}
-
-.team-size-label {
-  display: block;
-  margin-bottom: 0.4rem;
-  color: var(--color-text-muted);
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.team-player-options .option-btn {
-  padding: 0.6rem 0.4rem;
 }

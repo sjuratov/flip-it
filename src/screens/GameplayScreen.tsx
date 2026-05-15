@@ -1,12 +1,17 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { GameConfig, AnswerResult } from '../types';
+import type { RoundConfig, AnswerResult } from '../types';
 import { useTimer } from '../hooks/useTimer';
 import { useTilt } from '../hooks/useTilt';
 import './GameplayScreen.css';
 
 interface GameplayScreenProps {
-  config: GameConfig;
+  roundConfig: RoundConfig;
+  timerDuration: number;
+  teamName: string;
+  roundNumber: number;
+  totalRounds: number;
   onFinish: (results: AnswerResult[]) => void;
+  onResetMatch: () => void;
 }
 
 function shuffleArray<T>(arr: T[]): T[] {
@@ -18,14 +23,22 @@ function shuffleArray<T>(arr: T[]): T[] {
   return shuffled;
 }
 
-export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
+export function GameplayScreen({
+  roundConfig,
+  timerDuration,
+  teamName,
+  roundNumber,
+  totalRounds,
+  onFinish,
+  onResetMatch,
+}: GameplayScreenProps) {
   const phrasePool = useMemo(() => {
-    const all = config.categories.flatMap((c) =>
+    const all = roundConfig.categories.flatMap((c) =>
       c.phrases
         .filter(
           (phrase) =>
-            config.difficulty === 'chaos' ||
-            phrase.difficulty === config.difficulty,
+            roundConfig.difficulty === 'chaos' ||
+            phrase.difficulty === roundConfig.difficulty,
         )
         .map((phrase) => ({
           phrase: phrase.text,
@@ -34,13 +47,13 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
         })),
     );
     return shuffleArray(all);
-  }, [config.categories, config.difficulty]);
+  }, [roundConfig.categories, roundConfig.difficulty]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<AnswerResult[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
 
-  const { timeLeft, isExpired, start: startTimer } = useTimer(config.timerDuration);
+  const { timeLeft, isExpired, start: startTimer } = useTimer(timerDuration);
 
   useEffect(() => {
     startTimer();
@@ -108,7 +121,16 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
 
   return (
     <div className={`gameplay-screen ${feedbackClass}`}>
-      <div className="gameplay-timer">{formatTime(timeLeft)}</div>
+      <div className="gameplay-topbar">
+        <button className="btn btn-text" onClick={onResetMatch}>
+          Reset Match
+        </button>
+        <div className="gameplay-turn-info">
+          <strong>{teamName}</strong>
+          <span>Round {roundNumber} of {totalRounds}</span>
+        </div>
+        <div className="gameplay-timer">{formatTime(timeLeft)}</div>
+      </div>
 
       <div className="gameplay-phrase-container">
         <div className="gameplay-phrase" key={currentIndex}>

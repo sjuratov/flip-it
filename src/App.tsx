@@ -4,6 +4,7 @@ import { ThemeProvider } from './hooks/ThemeProvider';
 import { ThemeToggle } from './screens/ThemeToggle';
 import { HomeScreen } from './screens/HomeScreen';
 import { SetupScreen } from './screens/SetupScreen';
+import { RoundSetupScreen } from './screens/RoundSetupScreen';
 import { ReadyScreen } from './screens/ReadyScreen';
 import { GameplayScreen } from './screens/GameplayScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
@@ -15,11 +16,20 @@ function loadSavedMatch(): MatchState | null {
   if (!saved) return null;
   try {
     const match = JSON.parse(saved) as MatchState;
-    const hasDifficulty = Boolean(match.config?.difficulty);
-    const hasDifficultyPhrases = match.config?.categories?.every((category) =>
-      category.phrases.every((phrase) => typeof phrase !== 'string'),
+    const hasMatchConfig = Boolean(
+      match.config?.teams?.length &&
+        match.config?.timerDuration &&
+        match.config?.roundsPerTeam,
     );
-    if (!hasDifficulty || !hasDifficultyPhrases) {
+    const hasValidRoundConfig =
+      match.roundConfig === null ||
+      Boolean(
+        match.roundConfig?.difficulty &&
+          match.roundConfig?.categories?.every((category) =>
+            category.phrases.every((phrase) => typeof phrase !== 'string'),
+          ),
+      );
+    if (!hasMatchConfig || !hasValidRoundConfig) {
       localStorage.removeItem(MATCH_STORAGE_KEY);
       return null;
     }
@@ -42,9 +52,11 @@ function App() {
   const [matchState, setMatchState] = useState<MatchState | null>(() =>
     loadSavedMatch(),
   );
-  const [screen, setScreen] = useState<Screen>(() =>
-    loadSavedMatch()?.rounds.length ? 'results' : 'home',
-  );
+  const [screen, setScreen] = useState<Screen>(() => {
+    const saved = loadSavedMatch();
+    if (!saved) return 'home';
+    return saved.rounds.length ? 'results' : 'round-setup';
+  });
 
   const handlePlay = () => setScreen('setup');
 
@@ -52,10 +64,24 @@ function App() {
     const nextMatch: MatchState = {
       config,
       activeTeamIndex: 0,
+      roundConfig: null,
       rounds: [],
     };
     setMatchState(nextMatch);
     saveMatch(nextMatch);
+    setScreen('round-setup');
+  };
+
+  const handleStartRound = (roundConfig: MatchState['roundConfig']) => {
+    setMatchState((current) => {
+      if (!current || !roundConfig) return current;
+      const nextMatch = {
+        ...current,
+        roundConfig,
+      };
+      saveMatch(nextMatch);
+      return nextMatch;
+    });
     setScreen('ready');
   };
 
@@ -86,10 +112,15 @@ function App() {
   }, []);
 
   const handleNextRound = () => {
-    setScreen('ready');
+    setScreen('round-setup');
   };
 
   const handleResetMatch = () => {
+    if (
+      !window.confirm('Reset the whole match? Scores and round history will be lost.')
+    ) {
+      return;
+    }
     setMatchState(null);
     saveMatch(null);
     setScreen('setup');
@@ -102,6 +133,13 @@ function App() {
   };
 
   const activeTeam = matchState?.config.teams[matchState.activeTeamIndex];
+  const totalRounds = matchState
+    ? matchState.config.teams.length * matchState.config.roundsPerTeam
+    : 0;
+  const currentRoundNumber = matchState ? matchState.rounds.length + 1 : 1;
+  const isMatchComplete = matchState
+    ? matchState.rounds.length >= totalRounds
+    : false;
 
   return (
     <ThemeProvider>
@@ -110,15 +148,40 @@ function App() {
       {screen === 'setup' && (
         <SetupScreen onStart={handleStart} onBack={handleBackToHome} />
       )}
-      {screen === 'ready' && activeTeam && (
-        <ReadyScreen teamName={activeTeam.name} onReady={handleReady} />
+      {screen === 'round-setup' && matchState && activeTeam && (
+        <RoundSetupScreen
+          teamName={activeTeam.name}
+          roundNumber={currentRoundNumber}
+          totalRounds={totalRounds}
+          initialConfig={matchState.roundConfig}
+          onStartRound={handleStartRound}
+          onResetMatch={handleResetMatch}
+        />
       )}
-      {screen === 'gameplay' && matchState && (
-        <GameplayScreen config={matchState.config} onFinish={handleFinish} />
+      {screen === 'ready' && activeTeam && (
+        <ReadyScreen
+          teamName={activeTeam.name}
+          roundNumber={currentRoundNumber}
+          totalRounds={totalRounds}
+          onReady={handleReady}
+          onResetMatch={handleResetMatch}
+        />
+      )}
+      {screen === 'gameplay' && matchState && matchState.roundConfig && activeTeam && (
+        <GameplayScreen
+          roundConfig={matchState.roundConfig}
+          timerDuration={matchState.config.timerDuration}
+          teamName={activeTeam.name}
+          roundNumber={currentRoundNumber}
+          totalRounds={totalRounds}
+          onFinish={handleFinish}
+          onResetMatch={handleResetMatch}
+        />
       )}
       {screen === 'results' && matchState && (
         <ResultsScreen
           matchState={matchState}
+          isMatchComplete={isMatchComplete}
           onNextRound={handleNextRound}
           onResetMatch={handleResetMatch}
         />

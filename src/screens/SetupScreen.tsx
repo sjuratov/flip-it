@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import type { Category, DifficultySelection, GameConfig } from '../types';
-import { categories as allCategories } from '../data/categories';
+import type { GameConfig } from '../types';
 import './SetupScreen.css';
 
 const TIMER_OPTIONS = [
@@ -11,39 +10,12 @@ const TIMER_OPTIONS = [
 ];
 
 const TEAM_OPTIONS = [2, 3, 4];
-const PLAYER_OPTIONS = [2, 3, 4, 5, 6];
-const DIFFICULTY_OPTIONS: Array<{
-  value: DifficultySelection;
-  label: string;
-  description: string;
-}> = [
-  {
-    value: 'family',
-    label: 'Family Fun',
-    description: 'Easy, kid-friendly phrases everyone knows.',
-  },
-  {
-    value: 'brain-burn',
-    label: 'Brain Burn',
-    description: 'Harder phrases for adults and confident players.',
-  },
-  {
-    value: 'genius',
-    label: 'Genius Mode',
-    description: 'Obscure, clever, and expert-level clues.',
-  },
-  {
-    value: 'chaos',
-    label: 'Chaos Mix',
-    description: 'A funny random mix from all difficulty levels.',
-  },
-];
+const ROUNDS_PER_TEAM_OPTIONS = [1, 2, 3, 4, 5];
 
 function createTeams(count: number) {
   return Array.from({ length: count }, (_, index) => ({
     id: `team-${index + 1}`,
     name: `Team ${index + 1}`,
-    playerCount: 2,
   }));
 }
 
@@ -53,30 +25,9 @@ interface SetupScreenProps {
 }
 
 export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<Set<string>>(
-    new Set(),
-  );
   const [teams, setTeams] = useState(createTeams(2));
   const [timerDuration, setTimerDuration] = useState(60);
-  const [difficulty, setDifficulty] = useState<DifficultySelection>('chaos');
-
-  const toggleCategory = (id: string) => {
-    setSelectedCategoryIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
-  const selectedCategories: Category[] = allCategories.filter((c) =>
-    selectedCategoryIds.has(c.id),
-  );
-
-  const canStart = selectedCategories.length > 0;
+  const [roundsPerTeam, setRoundsPerTeam] = useState(2);
 
   const setTeamCount = (count: number) => {
     setTeams((prev) =>
@@ -85,7 +36,6 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
         return existing ?? {
           id: `team-${index + 1}`,
           name: `Team ${index + 1}`,
-          playerCount: 2,
         };
       }),
     );
@@ -99,20 +49,10 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
     );
   };
 
-  const setTeamPlayerCount = (teamId: string, playerCount: number) => {
-    setTeams((prev) =>
-      prev.map((team) =>
-        team.id === teamId ? { ...team, playerCount } : team,
-      ),
-    );
-  };
-
   const handleStart = () => {
-    if (!canStart) return;
     onStart({
-      categories: selectedCategories,
       timerDuration,
-      difficulty,
+      roundsPerTeam,
       teams: teams.map((team, index) => ({
         ...team,
         name: team.name.trim() || `Team ${index + 1}`,
@@ -126,42 +66,8 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
         <button className="btn btn-text" onClick={onBack}>
           ← Back
         </button>
-        <h2>Game Setup</h2>
+        <h2>Match Setup</h2>
       </div>
-
-      <section className="setup-section">
-        <h3>Categories</h3>
-        <div className="category-grid">
-          {allCategories.map((cat) => (
-            <button
-              key={cat.id}
-              className={`category-card ${selectedCategoryIds.has(cat.id) ? 'selected' : ''}`}
-              onClick={() => toggleCategory(cat.id)}
-            >
-              <span className="category-icon">{cat.icon}</span>
-              <span className="category-name">{cat.name}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="setup-section">
-        <h3>Difficulty</h3>
-        <div className="difficulty-grid">
-          {DIFFICULTY_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              className={`difficulty-card ${difficulty === option.value ? 'selected' : ''}`}
-              onClick={() => setDifficulty(option.value)}
-            >
-              <span className="difficulty-name">{option.label}</span>
-              <span className="difficulty-description">
-                {option.description}
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
 
       <section className="setup-section">
         <h3>Teams</h3>
@@ -177,7 +83,7 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
           ))}
         </div>
         <p className="setup-hint">
-          Each team needs at least 2 players: one guesses, teammates describe.
+          Each round is played by one team: one teammate guesses, the rest describe.
         </p>
         <div className="team-list">
           {teams.map((team, index) => (
@@ -190,23 +96,28 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
                   onChange={(event) => setTeamName(team.id, event.target.value)}
                 />
               </label>
-              <div>
-                <span className="team-size-label">Players</span>
-                <div className="option-group team-player-options">
-                  {PLAYER_OPTIONS.map((n) => (
-                    <button
-                      key={n}
-                      className={`option-btn ${team.playerCount === n ? 'active' : ''}`}
-                      onClick={() => setTeamPlayerCount(team.id, n)}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="setup-section">
+        <h3>Rounds per Team</h3>
+        <div className="option-group">
+          {ROUNDS_PER_TEAM_OPTIONS.map((n) => (
+            <button
+              key={n}
+              className={`option-btn ${roundsPerTeam === n ? 'active' : ''}`}
+              onClick={() => setRoundsPerTeam(n)}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+        <p className="setup-hint">
+          {teams.length} teams × {roundsPerTeam} rounds ={' '}
+          {teams.length * roundsPerTeam} total rounds.
+        </p>
       </section>
 
       <section className="setup-section">
@@ -226,10 +137,9 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
 
       <button
         className="btn btn-primary btn-large"
-        disabled={!canStart}
         onClick={handleStart}
       >
-        Start Game
+        Continue
       </button>
     </div>
   );

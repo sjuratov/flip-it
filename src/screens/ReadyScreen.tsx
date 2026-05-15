@@ -3,7 +3,10 @@ import './ReadyScreen.css';
 
 interface ReadyScreenProps {
   teamName: string;
+  roundNumber: number;
+  totalRounds: number;
   onReady: () => void;
+  onResetMatch: () => void;
 }
 
 type PermissionEventConstructor = {
@@ -63,7 +66,13 @@ function permissionDeniedMessage(): string {
   return 'Tilt permission was not granted. You can still play with the buttons.';
 }
 
-export function ReadyScreen({ teamName, onReady }: ReadyScreenProps) {
+export function ReadyScreen({
+  teamName,
+  roundNumber,
+  totalRounds,
+  onReady,
+  onResetMatch,
+}: ReadyScreenProps) {
   const [phase, setPhase] = useState<'waiting' | 'countdown'>('waiting');
   const [count, setCount] = useState(3);
   const [permissionMessage, setPermissionMessage] = useState(sensorPermissionMessage);
@@ -91,9 +100,13 @@ export function ReadyScreen({ teamName, onReady }: ReadyScreenProps) {
 
   return (
     <div className="ready-screen">
+      <button className="btn btn-text ready-reset-btn" onClick={onResetMatch}>
+        Reset Match
+      </button>
       <div className="ready-instruction">
         <span className="ready-phone-icon">📱</span>
         <p>{teamName} is up!</p>
+        <p className="ready-hint">Round {roundNumber} of {totalRounds}</p>
         <p>Place the phone on your forehead</p>
         <p className="ready-hint">Screen facing outward</p>
         <p className="ready-hint">{permissionMessage}</p>

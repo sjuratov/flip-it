@@ -16,7 +16,36 @@
   background-color: var(--color-wrong) !important;
 }
 
+.gameplay-topbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.gameplay-turn-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  text-align: center;
+}
+
+.gameplay-turn-info strong {
+  font-size: 1rem;
+}
+
+.gameplay-turn-info span {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .gameplay-timer {
+  justify-self: end;
   font-size: 1.5rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;

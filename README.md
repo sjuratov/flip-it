@@ -6,16 +6,16 @@ Works in any browser, installable on iOS and Android as a PWA — no app store n
 
 ## 🎮 How to Play
 
-1. **Create teams** — 2–4 teams, with at least 2 players per team
-2. **Choose categories** — pick one or more from 15 available categories
-3. **Choose difficulty** — Family Fun, Brain Burn, Genius Mode, or Chaos Mix
-4. **Set the timer** — 30 seconds, 1 minute, 2 minutes, or 3 minutes
+1. **Create teams** — 2–4 teams and team names
+2. **Choose rounds per team** — default is 2 turns per team
+3. **Set the timer** — 30 seconds, 1 minute, 2 minutes, or 3 minutes
+4. **Configure each round** — pick categories and difficulty before each team plays
 5. **Take turns by team** — one player from the active team guesses, teammates describe
 6. **Guessed correctly?** Tilt the phone **down** ✅
 7. **Want to skip?** Tilt the phone **up** ❌
 8. **When time's up** — see the round score, phrase list, and match scoreboard
 
-Scores accumulate across rounds and the active team rotates automatically.
+Scores accumulate across rounds, the active team rotates automatically, and you can change categories/difficulty between rounds.
 
 ## 🧠 Difficulty Levels
 
