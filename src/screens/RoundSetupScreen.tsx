@@ -1,4 +1,9 @@
-import { useRef, useState, type TouchEvent } from 'react';
+import {
+  useRef,
+  useState,
+  type MouseEvent,
+  type PointerEvent,
+} from 'react';
 import type { Category, DifficultySelection, RoundConfig } from '../types';
 import { categories as allCategories } from '../data/categories';
 import './SetupScreen.css';
@@ -30,6 +35,9 @@ const DIFFICULTY_OPTIONS: Array<{
   },
 ];
 
+const TAP_MOVE_TOLERANCE_PX = 24;
+const TOUCH_CLICK_SUPPRESSION_MS = 800;
+
 interface RoundSetupScreenProps {
   teamName: string;
   roundNumber: number;
@@ -53,7 +61,12 @@ export function RoundSetupScreen({
   const [difficulty, setDifficulty] = useState<DifficultySelection>(
     initialConfig?.difficulty ?? 'chaos',
   );
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const pointerStartRef = useRef<{
+    pointerId: number;
+    x: number;
+    y: number;
+  } | null>(null);
+  const suppressClickUntilRef = useRef(0);
 
   const toggleCategory = (id: string) => {
     setSelectedCategoryIds((prev) => {
@@ -79,32 +92,55 @@ export function RoundSetupScreen({
     });
   };
 
-  const handleTileTouchStart = (
-    event: TouchEvent<HTMLButtonElement>,
-  ) => {
-    const touch = event.changedTouches[0];
-    touchStartRef.current = touch
-      ? { x: touch.clientX, y: touch.clientY }
-      : null;
+  const handleTilePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === 'mouse') return;
+
+    pointerStartRef.current = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const handleTileTouchEnd = (
-    event: TouchEvent<HTMLButtonElement>,
+  const handleTilePointerUp = (
+    event: PointerEvent<HTMLButtonElement>,
     action: () => void,
   ) => {
-    const start = touchStartRef.current;
-    const touch = event.changedTouches[0];
-    touchStartRef.current = null;
+    if (event.pointerType === 'mouse') return;
 
-    if (!start || !touch) return;
+    const start = pointerStartRef.current;
+    pointerStartRef.current = null;
 
-    const deltaX = touch.clientX - start.x;
-    const deltaY = touch.clientY - start.y;
+    if (!start || start.pointerId !== event.pointerId) return;
+
+    const deltaX = event.clientX - start.x;
+    const deltaY = event.clientY - start.y;
     const moved = Math.hypot(deltaX, deltaY);
 
-    if (moved > 12) return;
+    if (moved > TAP_MOVE_TOLERANCE_PX) return;
 
     event.preventDefault();
+    event.stopPropagation();
+    suppressClickUntilRef.current =
+      event.timeStamp + TOUCH_CLICK_SUPPRESSION_MS;
+    action();
+  };
+
+  const handleTilePointerCancel = () => {
+    pointerStartRef.current = null;
+  };
+
+  const handleTileClick = (
+    event: MouseEvent<HTMLButtonElement>,
+    action: () => void,
+  ) => {
+    if (event.timeStamp < suppressClickUntilRef.current) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
     action();
   };
 
@@ -134,11 +170,14 @@ export function RoundSetupScreen({
               type="button"
               key={category.id}
               className={`category-card ${selectedCategoryIds.has(category.id) ? 'selected' : ''}`}
-              onClick={() => toggleCategory(category.id)}
-              onTouchStart={handleTileTouchStart}
-              onTouchEnd={(event) =>
-                handleTileTouchEnd(event, () => toggleCategory(category.id))
+              onClick={(event) =>
+                handleTileClick(event, () => toggleCategory(category.id))
               }
+              onPointerDown={handleTilePointerDown}
+              onPointerUp={(event) =>
+                handleTilePointerUp(event, () => toggleCategory(category.id))
+              }
+              onPointerCancel={handleTilePointerCancel}
               aria-pressed={selectedCategoryIds.has(category.id)}
             >
               <span className="category-icon">{category.icon}</span>
@@ -156,11 +195,14 @@ export function RoundSetupScreen({
               type="button"
               key={option.value}
               className={`difficulty-card ${difficulty === option.value ? 'selected' : ''}`}
-              onClick={() => setDifficulty(option.value)}
-              onTouchStart={handleTileTouchStart}
-              onTouchEnd={(event) =>
-                handleTileTouchEnd(event, () => setDifficulty(option.value))
+              onClick={(event) =>
+                handleTileClick(event, () => setDifficulty(option.value))
               }
+              onPointerDown={handleTilePointerDown}
+              onPointerUp={(event) =>
+                handleTilePointerUp(event, () => setDifficulty(option.value))
+              }
+              onPointerCancel={handleTilePointerCancel}
               aria-pressed={difficulty === option.value}
             >
               <span className="difficulty-name">{option.label}</span>

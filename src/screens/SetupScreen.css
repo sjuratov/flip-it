@@ -87,6 +87,11 @@
   background: var(--color-primary-light);
 }
 
+.category-card > *,
+.difficulty-card > * {
+  pointer-events: none;
+}
+
 .category-icon {
   font-size: 2rem;
 }
