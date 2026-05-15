@@ -1,18 +1,39 @@
-import type { AnswerResult } from '../types';
+import type { MatchState } from '../types';
 import './ResultsScreen.css';
 
 interface ResultsScreenProps {
-  results: AnswerResult[];
-  onPlayAgain: () => void;
+  matchState: MatchState;
+  onNextRound: () => void;
+  onResetMatch: () => void;
 }
 
-export function ResultsScreen({ results, onPlayAgain }: ResultsScreenProps) {
-  const correct = results.filter((r) => r.correct).length;
+export function ResultsScreen({
+  matchState,
+  onNextRound,
+  onResetMatch,
+}: ResultsScreenProps) {
+  const latestRound = matchState.rounds.at(-1);
+  const results = latestRound?.answers ?? [];
+  const correct = latestRound?.score ?? 0;
   const wrong = results.filter((r) => !r.correct).length;
+  const nextTeam = matchState.config.teams[matchState.activeTeamIndex];
+
+  const teamTotals = matchState.config.teams.map((team) => ({
+    ...team,
+    score: matchState.rounds
+      .filter((round) => round.teamId === team.id)
+      .reduce((sum, round) => sum + round.score, 0),
+  }));
 
   return (
     <div className="results-screen">
       <h2 className="results-title">Round Over!</h2>
+      {latestRound && (
+        <p className="results-subtitle">
+          {latestRound.teamName} scored {latestRound.score} point
+          {latestRound.score === 1 ? '' : 's'}
+        </p>
+      )}
 
       <div className="results-summary">
         <div className="results-stat results-stat-correct">
@@ -24,6 +45,33 @@ export function ResultsScreen({ results, onPlayAgain }: ResultsScreenProps) {
           <span className="results-stat-label">Wrong</span>
         </div>
       </div>
+
+      <section className="match-scoreboard">
+        <h3>Match Score</h3>
+        <div className="team-score-list">
+          {teamTotals.map((team) => (
+            <div className="team-score-item" key={team.id}>
+              <span>
+                {team.name}
+                <small>{team.playerCount} players</small>
+              </span>
+              <strong>{team.score}</strong>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="round-history">
+        <h3>Round History</h3>
+        <div className="round-history-list">
+          {matchState.rounds.map((round, index) => (
+            <div className="round-history-item" key={`${round.teamId}-${index}`}>
+              <span>Round {index + 1}: {round.teamName}</span>
+              <strong>+{round.score}</strong>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <div className="results-list">
         {results.map((r, i) => (
@@ -40,8 +88,11 @@ export function ResultsScreen({ results, onPlayAgain }: ResultsScreenProps) {
         ))}
       </div>
 
-      <button className="btn btn-primary btn-large" onClick={onPlayAgain}>
-        Play Again
+      <button className="btn btn-primary btn-large" onClick={onNextRound}>
+        Next Round: {nextTeam.name}
+      </button>
+      <button className="btn btn-text" onClick={onResetMatch}>
+        Reset Match
       </button>
     </div>
   );

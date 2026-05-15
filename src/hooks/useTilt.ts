@@ -25,7 +25,10 @@ export function useTilt({ enabled, onTilt }: UseTiltOptions): UseTiltResult {
   const lockedRef = useRef(false);
   const betaBaselineRef = useRef<number | null>(null);
   const onTiltRef = useRef(onTilt);
-  onTiltRef.current = onTilt;
+
+  useEffect(() => {
+    onTiltRef.current = onTilt;
+  }, [onTilt]);
 
   const handleTilt = useCallback((dir: 'up' | 'down') => {
     if (lockedRef.current) return;

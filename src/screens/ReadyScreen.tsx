@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import './ReadyScreen.css';
 
 interface ReadyScreenProps {
+  teamName: string;
   onReady: () => void;
 }
 
@@ -62,7 +63,7 @@ function permissionDeniedMessage(): string {
   return 'Tilt permission was not granted. You can still play with the buttons.';
 }
 
-export function ReadyScreen({ onReady }: ReadyScreenProps) {
+export function ReadyScreen({ teamName, onReady }: ReadyScreenProps) {
   const [phase, setPhase] = useState<'waiting' | 'countdown'>('waiting');
   const [count, setCount] = useState(3);
   const [permissionMessage, setPermissionMessage] = useState(sensorPermissionMessage);
@@ -92,6 +93,7 @@ export function ReadyScreen({ onReady }: ReadyScreenProps) {
     <div className="ready-screen">
       <div className="ready-instruction">
         <span className="ready-phone-icon">📱</span>
+        <p>{teamName} is up!</p>
         <p>Place the phone on your forehead</p>
         <p className="ready-hint">Screen facing outward</p>
         <p className="ready-hint">{permissionMessage}</p>

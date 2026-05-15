@@ -10,7 +10,16 @@ const TIMER_OPTIONS = [
   { label: '3 min', value: 180 },
 ];
 
-const PLAYER_OPTIONS = [2, 3, 4];
+const TEAM_OPTIONS = [2, 3, 4];
+const PLAYER_OPTIONS = [2, 3, 4, 5, 6];
+
+function createTeams(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `team-${index + 1}`,
+    name: `Team ${index + 1}`,
+    playerCount: 2,
+  }));
+}
 
 interface SetupScreenProps {
   onStart: (config: GameConfig) => void;
@@ -21,7 +30,7 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<Set<string>>(
     new Set(),
   );
-  const [playerCount, setPlayerCount] = useState(2);
+  const [teams, setTeams] = useState(createTeams(2));
   const [timerDuration, setTimerDuration] = useState(60);
 
   const toggleCategory = (id: string) => {
@@ -42,12 +51,44 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
 
   const canStart = selectedCategories.length > 0;
 
+  const setTeamCount = (count: number) => {
+    setTeams((prev) =>
+      Array.from({ length: count }, (_, index) => {
+        const existing = prev[index];
+        return existing ?? {
+          id: `team-${index + 1}`,
+          name: `Team ${index + 1}`,
+          playerCount: 2,
+        };
+      }),
+    );
+  };
+
+  const setTeamName = (teamId: string, name: string) => {
+    setTeams((prev) =>
+      prev.map((team) =>
+        team.id === teamId ? { ...team, name } : team,
+      ),
+    );
+  };
+
+  const setTeamPlayerCount = (teamId: string, playerCount: number) => {
+    setTeams((prev) =>
+      prev.map((team) =>
+        team.id === teamId ? { ...team, playerCount } : team,
+      ),
+    );
+  };
+
   const handleStart = () => {
     if (!canStart) return;
     onStart({
       categories: selectedCategories,
-      playerCount,
       timerDuration,
+      teams: teams.map((team, index) => ({
+        ...team,
+        name: team.name.trim() || `Team ${index + 1}`,
+      })),
     });
   };
 
@@ -77,16 +118,47 @@ export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
       </section>
 
       <section className="setup-section">
-        <h3>Players</h3>
+        <h3>Teams</h3>
         <div className="option-group">
-          {PLAYER_OPTIONS.map((n) => (
+          {TEAM_OPTIONS.map((n) => (
             <button
               key={n}
-              className={`option-btn ${playerCount === n ? 'active' : ''}`}
-              onClick={() => setPlayerCount(n)}
+              className={`option-btn ${teams.length === n ? 'active' : ''}`}
+              onClick={() => setTeamCount(n)}
             >
-              {n}
+              {n} Teams
             </button>
+          ))}
+        </div>
+        <p className="setup-hint">
+          Each team needs at least 2 players: one guesses, teammates describe.
+        </p>
+        <div className="team-list">
+          {teams.map((team, index) => (
+            <div className="team-card" key={team.id}>
+              <label className="team-name-label">
+                <span>Team {index + 1} name</span>
+                <input
+                  className="team-name-input"
+                  value={team.name}
+                  onChange={(event) => setTeamName(team.id, event.target.value)}
+                />
+              </label>
+              <div>
+                <span className="team-size-label">Players</span>
+                <div className="option-group team-player-options">
+                  {PLAYER_OPTIONS.map((n) => (
+                    <button
+                      key={n}
+                      className={`option-btn ${team.playerCount === n ? 'active' : ''}`}
+                      onClick={() => setTeamPlayerCount(team.id, n)}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </section>

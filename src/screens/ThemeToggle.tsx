@@ -1,4 +1,4 @@
-import { useTheme } from '../hooks/useTheme';
+import { useTheme } from '../hooks/themeContext';
 import './ThemeToggle.css';
 
 export function ThemeToggle() {

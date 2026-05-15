@@ -1,18 +1,20 @@
 # 🔄 Flip It!
 
-A fun party guessing game for 2–4 players. One player holds the phone on their forehead (screen facing outward) while the others describe the phrase shown on screen. Tilt down for correct, tilt up to pass!
+A fun team-based party guessing game. One player holds the phone on their forehead (screen facing outward) while their teammates describe the phrase shown on screen. Tilt down for correct, tilt up to pass!
 
 Works in any browser, installable on iOS and Android as a PWA — no app store needed.
 
 ## 🎮 How to Play
 
-1. **Choose categories** — pick one or more from 15 available categories
-2. **Set the timer** — 30 seconds, 1 minute, 2 minutes, or 3 minutes
-3. **Place the phone on your forehead** — screen facing outward so others can see
-4. **Other players describe the phrase** — without saying the actual words!
+1. **Create teams** — 2–4 teams, with at least 2 players per team
+2. **Choose categories** — pick one or more from 15 available categories
+3. **Set the timer** — 30 seconds, 1 minute, 2 minutes, or 3 minutes
+4. **Take turns by team** — one player from the active team guesses, teammates describe
 5. **Guessed correctly?** Tilt the phone **down** ✅
 6. **Want to skip?** Tilt the phone **up** ❌
-7. **When time's up** — see your score and all the phrases you got right or wrong
+7. **When time's up** — see the round score, phrase list, and match scoreboard
+
+Scores accumulate across rounds and the active team rotates automatically.
 
 ## 📂 Categories
 
@@ -76,9 +78,10 @@ Once installed, the app works **fully offline** — no internet needed after fir
 - 📱 Installable as a PWA on iOS and Android
 - 🔄 Tilt controls with iOS permission handling
 - ⏱️ Configurable round timer
+- 🏆 2–4 team match mode with cumulative scores and round history
 - 🎯 Results screen with color-coded answers and category labels
 - 🎲 Randomized phrase order each round
-- 💾 Theme preference saved to localStorage
+- 💾 Theme and match state saved to localStorage
 
 ## 📁 Project Structure
 
@@ -106,4 +109,3 @@ src/
 ## 📄 License
 
 MIT
-

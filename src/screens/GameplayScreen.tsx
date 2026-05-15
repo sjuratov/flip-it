@@ -29,18 +29,16 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<AnswerResult[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
-  const [gameStarted, setGameStarted] = useState(false);
 
   const { timeLeft, isExpired, start: startTimer } = useTimer(config.timerDuration);
 
   useEffect(() => {
     startTimer();
-    setGameStarted(true);
   }, [startTimer]);
 
   const handleAnswer = useCallback(
     (correct: boolean) => {
-      if (!gameStarted || isExpired) return;
+      if (isExpired) return;
 
       const current = phrasePool[currentIndex % phrasePool.length];
       setResults((prev) => [...prev, { phrase: current.phrase, category: current.category, correct }]);
@@ -51,7 +49,7 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
         setCurrentIndex((prev) => prev + 1);
       }, 800);
     },
-    [gameStarted, isExpired, phrasePool, currentIndex],
+    [isExpired, phrasePool, currentIndex],
   );
 
   const handleTilt = useCallback(
@@ -64,17 +62,17 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
 
   const { triggerManual } =
     useTilt({
-      enabled: gameStarted && !isExpired && feedback === null,
+      enabled: !isExpired && feedback === null,
       onTilt: handleTilt,
     });
 
   // End game when timer expires
   useEffect(() => {
-    if (isExpired && gameStarted) {
+    if (isExpired) {
       const timeout = setTimeout(() => onFinish(results), 500);
       return () => clearTimeout(timeout);
     }
-  }, [isExpired, gameStarted, onFinish, results]);
+  }, [isExpired, onFinish, results]);
 
   const currentPhrase = phrasePool[currentIndex % phrasePool.length].phrase;
 
