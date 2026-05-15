@@ -19,7 +19,7 @@ interface SetupScreenProps {
 
 export function SetupScreen({ onStart, onBack }: SetupScreenProps) {
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<Set<string>>(
-    new Set(allCategories.map((c) => c.id)),
+    new Set(),
   );
   const [playerCount, setPlayerCount] = useState(2);
   const [timerDuration, setTimerDuration] = useState(60);

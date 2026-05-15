@@ -35,6 +35,7 @@ export function ResultsScreen({ results, onPlayAgain }: ResultsScreenProps) {
               {r.correct ? '✓' : '✗'}
             </span>
             <span className="results-item-phrase">{r.phrase}</span>
+            <span className="results-item-category">({r.category})</span>
           </div>
         ))}
       </div>

@@ -19,8 +19,10 @@ function shuffleArray<T>(arr: T[]): T[] {
 }
 
 export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
-  const phrases = useMemo(() => {
-    const all = config.categories.flatMap((c) => c.phrases);
+  const phrasePool = useMemo(() => {
+    const all = config.categories.flatMap((c) =>
+      c.phrases.map((phrase) => ({ phrase, category: c.name })),
+    );
     return shuffleArray(all);
   }, [config.categories]);
 
@@ -40,8 +42,8 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
     (correct: boolean) => {
       if (!gameStarted || isExpired) return;
 
-      const phrase = phrases[currentIndex % phrases.length];
-      setResults((prev) => [...prev, { phrase, correct }]);
+      const current = phrasePool[currentIndex % phrasePool.length];
+      setResults((prev) => [...prev, { phrase: current.phrase, category: current.category, correct }]);
       setFeedback(correct ? 'correct' : 'wrong');
 
       setTimeout(() => {
@@ -49,7 +51,7 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
         setCurrentIndex((prev) => prev + 1);
       }, 800);
     },
-    [gameStarted, isExpired, phrases, currentIndex],
+    [gameStarted, isExpired, phrasePool, currentIndex],
   );
 
   const handleTilt = useCallback(
@@ -74,7 +76,7 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
     }
   }, [isExpired, gameStarted, onFinish, results]);
 
-  const currentPhrase = phrases[currentIndex % phrases.length];
+  const currentPhrase = phrasePool[currentIndex % phrasePool.length].phrase;
 
   const formatTime = (s: number) => {
     const mins = Math.floor(s / 60);

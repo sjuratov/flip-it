@@ -93,3 +93,13 @@
 .results-item-phrase {
   color: var(--color-text);
 }
+
+.results-item-category {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-left: 0.4rem;
+  white-space: nowrap;
+}

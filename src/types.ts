@@ -13,6 +13,7 @@ export interface GameConfig {
 
 export interface AnswerResult {
   phrase: string;
+  category: string;
   correct: boolean;
 }
 
