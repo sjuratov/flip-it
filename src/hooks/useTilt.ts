@@ -11,13 +11,19 @@ interface UseTiltResult {
   triggerManual: (dir: 'up' | 'down') => void;
 }
 
-const TILT_DOWN_THRESHOLD = 140; // beta > 140° = phone tilted face-down (correct)
-const TILT_UP_THRESHOLD = 40;   // beta < 40° = phone tilted face-up (wrong/skip)
+const TILT_DELTA_THRESHOLD = 35;
 const DEBOUNCE_MS = 1200;
+
+function normalizeAngleDelta(delta: number): number {
+  if (delta > 180) return delta - 360;
+  if (delta < -180) return delta + 360;
+  return delta;
+}
 
 export function useTilt({ enabled, onTilt }: UseTiltOptions): UseTiltResult {
   const [direction, setDirection] = useState<TiltDirection>('neutral');
   const lockedRef = useRef(false);
+  const betaBaselineRef = useRef<number | null>(null);
   const onTiltRef = useRef(onTilt);
   onTiltRef.current = onTilt;
 
@@ -32,22 +38,28 @@ export function useTilt({ enabled, onTilt }: UseTiltOptions): UseTiltResult {
     }, DEBOUNCE_MS);
   }, []);
 
-  // Always attach listener when enabled — permission is handled in ReadyScreen.
-  // On iOS if permission was granted, events fire. If not, they simply don't.
   useEffect(() => {
     if (!enabled) return;
     if (typeof window === 'undefined' || !('DeviceOrientationEvent' in window)) return;
+
+    betaBaselineRef.current = null;
 
     const handler = (event: DeviceOrientationEvent) => {
       const beta = event.beta;
       if (beta === null) return;
 
-      // Phone on forehead: beta ≈ 90° at rest
-      // Tilt down (bow head): beta → 180° → correct
-      // Tilt up (look up): beta → 0° → wrong/skip
-      if (beta > TILT_DOWN_THRESHOLD) {
+      if (betaBaselineRef.current === null) {
+        betaBaselineRef.current = beta;
+        return;
+      }
+
+      const delta = normalizeAngleDelta(beta - betaBaselineRef.current);
+
+      // Calibrated at the player's forehead/rest position:
+      // tilt down increases beta; tilt up decreases beta.
+      if (delta > TILT_DELTA_THRESHOLD) {
         handleTilt('down');
-      } else if (beta < TILT_UP_THRESHOLD) {
+      } else if (delta < -TILT_DELTA_THRESHOLD) {
         handleTilt('up');
       }
     };

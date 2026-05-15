@@ -5,31 +5,75 @@ interface ReadyScreenProps {
   onReady: () => void;
 }
 
-function needsOrientationPermission(): boolean {
-  const dme = DeviceOrientationEvent as unknown as {
-    requestPermission?: () => Promise<string>;
-  };
-  return typeof dme.requestPermission === 'function';
+type PermissionEventConstructor = {
+  requestPermission?: () => Promise<string>;
+};
+
+type SensorPermissionWindow = Window & {
+  DeviceOrientationEvent?: PermissionEventConstructor;
+  DeviceMotionEvent?: PermissionEventConstructor;
+};
+
+function getSensorPermissionConstructors(): PermissionEventConstructor[] {
+  const sensorWindow = window as SensorPermissionWindow;
+  return [
+    sensorWindow.DeviceOrientationEvent,
+    sensorWindow.DeviceMotionEvent,
+  ].filter(
+    (constructor): constructor is PermissionEventConstructor =>
+      typeof constructor?.requestPermission === 'function',
+  );
 }
 
-async function requestOrientationPermission(): Promise<boolean> {
-  const dme = DeviceOrientationEvent as unknown as {
-    requestPermission?: () => Promise<string>;
-  };
-  if (typeof dme.requestPermission === 'function') {
-    const result = await dme.requestPermission();
-    return result === 'granted';
+function needsSensorPermission(): boolean {
+  return getSensorPermissionConstructors().length > 0;
+}
+
+async function requestSensorPermission(): Promise<boolean> {
+  const constructors = getSensorPermissionConstructors();
+  if (constructors.length === 0) return true;
+
+  const results = await Promise.all(
+    constructors.map((constructor) => constructor.requestPermission?.()),
+  );
+  return results.every((result) => result === 'granted');
+}
+
+function supportsDeviceSensors(): boolean {
+  return (
+    'DeviceOrientationEvent' in window ||
+    'DeviceMotionEvent' in window
+  );
+}
+
+function sensorPermissionMessage(): string {
+  if (!supportsDeviceSensors()) {
+    return 'Tilt controls are not available here. Use the buttons during play.';
   }
-  return true;
+
+  if (needsSensorPermission()) {
+    return 'Tap to allow tilt controls on this device.';
+  }
+
+  return 'Tilt controls are ready.';
+}
+
+function permissionDeniedMessage(): string {
+  return 'Tilt permission was not granted. You can still play with the buttons.';
 }
 
 export function ReadyScreen({ onReady }: ReadyScreenProps) {
   const [phase, setPhase] = useState<'waiting' | 'countdown'>('waiting');
   const [count, setCount] = useState(3);
+  const [permissionMessage, setPermissionMessage] = useState(sensorPermissionMessage);
 
   const handleTap = useCallback(async () => {
-    if (needsOrientationPermission()) {
-      await requestOrientationPermission();
+    let granted = true;
+    if (needsSensorPermission()) {
+      granted = await requestSensorPermission();
+    }
+    if (!granted) {
+      setPermissionMessage(permissionDeniedMessage());
     }
     setPhase('countdown');
   }, []);
@@ -50,6 +94,7 @@ export function ReadyScreen({ onReady }: ReadyScreenProps) {
         <span className="ready-phone-icon">📱</span>
         <p>Place the phone on your forehead</p>
         <p className="ready-hint">Screen facing outward</p>
+        <p className="ready-hint">{permissionMessage}</p>
       </div>
       {phase === 'waiting' ? (
         <button className="btn btn-primary btn-large ready-start-btn" onClick={handleTap}>
