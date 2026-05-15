@@ -1,9 +1,4 @@
-import {
-  useRef,
-  useState,
-  type MouseEvent,
-  type PointerEvent,
-} from 'react';
+import { useRef, useState } from 'react';
 import type { Category, DifficultySelection, RoundConfig } from '../types';
 import { categories as allCategories } from '../data/categories';
 import './SetupScreen.css';
@@ -35,8 +30,17 @@ const DIFFICULTY_OPTIONS: Array<{
   },
 ];
 
-const TAP_MOVE_TOLERANCE_PX = 24;
-const TOUCH_CLICK_SUPPRESSION_MS = 800;
+/**
+ * Activation guard: on touch devices iOS fires both pointerup AND a
+ * synthesized click for the same tap.  Without a guard the toggle runs
+ * twice (select → deselect) so the tile appears to do nothing.
+ *
+ * We route both onPointerUp and onClick through `activateTile`.
+ * The first event for a given tap runs the action and records its
+ * timeStamp; any event whose timeStamp is within 500 ms of the last
+ * activation is silently dropped.
+ */
+const DEDUP_WINDOW_MS = 500;
 
 interface RoundSetupScreenProps {
   teamName: string;
@@ -61,12 +65,9 @@ export function RoundSetupScreen({
   const [difficulty, setDifficulty] = useState<DifficultySelection>(
     initialConfig?.difficulty ?? 'chaos',
   );
-  const pointerStartRef = useRef<{
-    pointerId: number;
-    x: number;
-    y: number;
-  } | null>(null);
-  const suppressClickUntilRef = useRef(0);
+
+  // Timestamp of last accepted activation (shared across all tiles)
+  const lastActivationRef = useRef(0);
 
   const toggleCategory = (id: string) => {
     setSelectedCategoryIds((prev) => {
@@ -92,55 +93,18 @@ export function RoundSetupScreen({
     });
   };
 
-  const handleTilePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
-    if (event.pointerType === 'mouse') return;
-
-    pointerStartRef.current = {
-      pointerId: event.pointerId,
-      x: event.clientX,
-      y: event.clientY,
-    };
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-
-  const handleTilePointerUp = (
-    event: PointerEvent<HTMLButtonElement>,
+  // Single handler for both onPointerUp and onClick.
+  // The first event runs the action; the duplicate is deduplicated.
+  const activateTile = (
+    event: React.PointerEvent<HTMLButtonElement> | React.MouseEvent<HTMLButtonElement>,
     action: () => void,
   ) => {
-    if (event.pointerType === 'mouse') return;
-
-    const start = pointerStartRef.current;
-    pointerStartRef.current = null;
-
-    if (!start || start.pointerId !== event.pointerId) return;
-
-    const deltaX = event.clientX - start.x;
-    const deltaY = event.clientY - start.y;
-    const moved = Math.hypot(deltaX, deltaY);
-
-    if (moved > TAP_MOVE_TOLERANCE_PX) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    suppressClickUntilRef.current =
-      event.timeStamp + TOUCH_CLICK_SUPPRESSION_MS;
-    action();
-  };
-
-  const handleTilePointerCancel = () => {
-    pointerStartRef.current = null;
-  };
-
-  const handleTileClick = (
-    event: MouseEvent<HTMLButtonElement>,
-    action: () => void,
-  ) => {
-    if (event.timeStamp < suppressClickUntilRef.current) {
+    const ts = event.timeStamp;
+    if (ts - lastActivationRef.current < DEDUP_WINDOW_MS) {
       event.preventDefault();
-      event.stopPropagation();
       return;
     }
-
+    lastActivationRef.current = ts;
     action();
   };
 
@@ -170,14 +134,8 @@ export function RoundSetupScreen({
               type="button"
               key={category.id}
               className={`category-card ${selectedCategoryIds.has(category.id) ? 'selected' : ''}`}
-              onClick={(event) =>
-                handleTileClick(event, () => toggleCategory(category.id))
-              }
-              onPointerDown={handleTilePointerDown}
-              onPointerUp={(event) =>
-                handleTilePointerUp(event, () => toggleCategory(category.id))
-              }
-              onPointerCancel={handleTilePointerCancel}
+              onPointerUp={(e) => activateTile(e, () => toggleCategory(category.id))}
+              onClick={(e) => activateTile(e, () => toggleCategory(category.id))}
               aria-pressed={selectedCategoryIds.has(category.id)}
             >
               <span className="category-icon">{category.icon}</span>
@@ -195,14 +153,8 @@ export function RoundSetupScreen({
               type="button"
               key={option.value}
               className={`difficulty-card ${difficulty === option.value ? 'selected' : ''}`}
-              onClick={(event) =>
-                handleTileClick(event, () => setDifficulty(option.value))
-              }
-              onPointerDown={handleTilePointerDown}
-              onPointerUp={(event) =>
-                handleTilePointerUp(event, () => setDifficulty(option.value))
-              }
-              onPointerCancel={handleTilePointerCancel}
+              onPointerUp={(e) => activateTile(e, () => setDifficulty(option.value))}
+              onClick={(e) => activateTile(e, () => setDifficulty(option.value))}
               aria-pressed={difficulty === option.value}
             >
               <span className="difficulty-name">{option.label}</span>
@@ -224,3 +176,4 @@ export function RoundSetupScreen({
     </div>
   );
 }
+

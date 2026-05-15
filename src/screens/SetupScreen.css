@@ -70,7 +70,7 @@
   border-radius: 12px;
   background: var(--color-surface);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.15s, background-color 0.15s;
   font-family: inherit;
   color: var(--color-text);
   touch-action: manipulation;
@@ -78,8 +78,11 @@
   appearance: none;
 }
 
-.category-card:hover {
-  border-color: var(--color-primary);
+/* Only apply :hover on devices that truly support hover (mouse/trackpad) */
+@media (hover: hover) and (pointer: fine) {
+  .category-card:hover {
+    border-color: var(--color-primary);
+  }
 }
 
 .category-card.selected {
@@ -121,14 +124,16 @@
   cursor: pointer;
   font-family: inherit;
   text-align: left;
-  transition: all 0.2s;
+  transition: border-color 0.15s, background-color 0.15s;
   touch-action: manipulation;
   -webkit-appearance: none;
   appearance: none;
 }
 
-.difficulty-card:hover {
-  border-color: var(--color-primary);
+@media (hover: hover) and (pointer: fine) {
+  .difficulty-card:hover {
+    border-color: var(--color-primary);
+  }
 }
 
 .difficulty-card.selected {
@@ -163,11 +168,13 @@
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s;
 }
 
-.option-btn:hover {
-  border-color: var(--color-primary);
+@media (hover: hover) and (pointer: fine) {
+  .option-btn:hover {
+    border-color: var(--color-primary);
+  }
 }
 
 .option-btn.active {
