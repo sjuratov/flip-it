@@ -41,9 +41,26 @@ npm run dev
 # Build for production
 npm run build
 
-# Preview production build
+# Preview production build locally
 npm run preview
 ```
+
+## 🌐 Deployment (GitHub Pages)
+
+The app auto-deploys to GitHub Pages on every push to `main` via GitHub Actions.
+
+**One-time setup** in your GitHub repo:
+1. Go to **Settings → Pages**
+2. Set **Source** to **GitHub Actions**
+3. Push to `main` — the workflow handles the rest
+
+Your game will be live at `https://<username>.github.io/flip-it/`
+
+**Installing on mobile:**
+- **iOS**: Open in Safari → tap Share → **Add to Home Screen**
+- **Android**: Open in Chrome → tap **Install** prompt (or menu → Install app)
+
+Once installed, the app works **fully offline** — no internet needed after first visit.
 
 ## 🛠 Tech Stack
 
