@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { TiltDirection } from '../types';
 
 interface UseTiltOptions {
@@ -8,9 +8,6 @@ interface UseTiltOptions {
 
 interface UseTiltResult {
   direction: TiltDirection;
-  permissionGranted: boolean;
-  needsPermission: boolean;
-  requestPermission: () => Promise<void>;
   triggerManual: (dir: 'up' | 'down') => void;
 }
 
@@ -20,40 +17,9 @@ const DEBOUNCE_MS = 1200;
 
 export function useTilt({ enabled, onTilt }: UseTiltOptions): UseTiltResult {
   const [direction, setDirection] = useState<TiltDirection>('neutral');
-  const [permissionGranted, setPermissionGranted] = useState(false);
-  const [needsPermission, setNeedsPermission] = useState(false);
   const lockedRef = useRef(false);
   const onTiltRef = useRef(onTilt);
   onTiltRef.current = onTilt;
-
-  const isDeviceOrientationSupported =
-    typeof window !== 'undefined' && 'DeviceOrientationEvent' in window;
-
-  useEffect(() => {
-    if (!isDeviceOrientationSupported) return;
-
-    const dme = DeviceOrientationEvent as unknown as {
-      requestPermission?: () => Promise<string>;
-    };
-    if (typeof dme.requestPermission === 'function') {
-      setNeedsPermission(true);
-    } else {
-      setPermissionGranted(true);
-    }
-  }, [isDeviceOrientationSupported]);
-
-  const requestPermission = useCallback(async () => {
-    const dme = DeviceOrientationEvent as unknown as {
-      requestPermission?: () => Promise<string>;
-    };
-    if (typeof dme.requestPermission === 'function') {
-      const result = await dme.requestPermission();
-      if (result === 'granted') {
-        setPermissionGranted(true);
-        setNeedsPermission(false);
-      }
-    }
-  }, []);
 
   const handleTilt = useCallback((dir: 'up' | 'down') => {
     if (lockedRef.current) return;
@@ -66,8 +32,11 @@ export function useTilt({ enabled, onTilt }: UseTiltOptions): UseTiltResult {
     }, DEBOUNCE_MS);
   }, []);
 
+  // Always attach listener when enabled — permission is handled in ReadyScreen.
+  // On iOS if permission was granted, events fire. If not, they simply don't.
   useEffect(() => {
-    if (!enabled || !permissionGranted || !isDeviceOrientationSupported) return;
+    if (!enabled) return;
+    if (typeof window === 'undefined' || !('DeviceOrientationEvent' in window)) return;
 
     const handler = (event: DeviceOrientationEvent) => {
       const beta = event.beta;
@@ -85,7 +54,7 @@ export function useTilt({ enabled, onTilt }: UseTiltOptions): UseTiltResult {
 
     window.addEventListener('deviceorientation', handler);
     return () => window.removeEventListener('deviceorientation', handler);
-  }, [enabled, permissionGranted, isDeviceOrientationSupported, handleTilt]);
+  }, [enabled, handleTilt]);
 
   const triggerManual = useCallback(
     (dir: 'up' | 'down') => {
@@ -94,11 +63,5 @@ export function useTilt({ enabled, onTilt }: UseTiltOptions): UseTiltResult {
     [handleTilt],
   );
 
-  return {
-    direction,
-    permissionGranted,
-    needsPermission,
-    requestPermission,
-    triggerManual,
-  };
+  return { direction, triggerManual };
 }
