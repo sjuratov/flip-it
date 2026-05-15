@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState, type TouchEvent } from 'react';
 import type { Category, DifficultySelection, RoundConfig } from '../types';
 import { categories as allCategories } from '../data/categories';
 import './SetupScreen.css';
@@ -53,6 +53,7 @@ export function RoundSetupScreen({
   const [difficulty, setDifficulty] = useState<DifficultySelection>(
     initialConfig?.difficulty ?? 'chaos',
   );
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const toggleCategory = (id: string) => {
     setSelectedCategoryIds((prev) => {
@@ -78,6 +79,35 @@ export function RoundSetupScreen({
     });
   };
 
+  const handleTileTouchStart = (
+    event: TouchEvent<HTMLButtonElement>,
+  ) => {
+    const touch = event.changedTouches[0];
+    touchStartRef.current = touch
+      ? { x: touch.clientX, y: touch.clientY }
+      : null;
+  };
+
+  const handleTileTouchEnd = (
+    event: TouchEvent<HTMLButtonElement>,
+    action: () => void,
+  ) => {
+    const start = touchStartRef.current;
+    const touch = event.changedTouches[0];
+    touchStartRef.current = null;
+
+    if (!start || !touch) return;
+
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+    const moved = Math.hypot(deltaX, deltaY);
+
+    if (moved > 12) return;
+
+    event.preventDefault();
+    action();
+  };
+
   return (
     <div className="setup-screen">
       <div className="setup-header">
@@ -101,9 +131,15 @@ export function RoundSetupScreen({
         <div className="category-grid">
           {allCategories.map((category) => (
             <button
+              type="button"
               key={category.id}
               className={`category-card ${selectedCategoryIds.has(category.id) ? 'selected' : ''}`}
               onClick={() => toggleCategory(category.id)}
+              onTouchStart={handleTileTouchStart}
+              onTouchEnd={(event) =>
+                handleTileTouchEnd(event, () => toggleCategory(category.id))
+              }
+              aria-pressed={selectedCategoryIds.has(category.id)}
             >
               <span className="category-icon">{category.icon}</span>
               <span className="category-name">{category.name}</span>
@@ -117,9 +153,15 @@ export function RoundSetupScreen({
         <div className="difficulty-grid">
           {DIFFICULTY_OPTIONS.map((option) => (
             <button
+              type="button"
               key={option.value}
               className={`difficulty-card ${difficulty === option.value ? 'selected' : ''}`}
               onClick={() => setDifficulty(option.value)}
+              onTouchStart={handleTileTouchStart}
+              onTouchEnd={(event) =>
+                handleTileTouchEnd(event, () => setDifficulty(option.value))
+              }
+              aria-pressed={difficulty === option.value}
             >
               <span className="difficulty-name">{option.label}</span>
               <span className="difficulty-description">
