@@ -14,8 +14,8 @@ interface UseTiltResult {
   triggerManual: (dir: 'up' | 'down') => void;
 }
 
-const TILT_DOWN_THRESHOLD = -30;
-const TILT_UP_THRESHOLD = 150;
+const TILT_DOWN_THRESHOLD = 140; // beta > 140° = phone tilted face-down (correct)
+const TILT_UP_THRESHOLD = 40;   // beta < 40° = phone tilted face-up (wrong/skip)
 const DEBOUNCE_MS = 1200;
 
 export function useTilt({ enabled, onTilt }: UseTiltOptions): UseTiltResult {
@@ -73,9 +73,12 @@ export function useTilt({ enabled, onTilt }: UseTiltOptions): UseTiltResult {
       const beta = event.beta;
       if (beta === null) return;
 
-      if (beta < TILT_DOWN_THRESHOLD) {
+      // Phone on forehead: beta ≈ 90° at rest
+      // Tilt down (bow head): beta → 180° → correct
+      // Tilt up (look up): beta → 0° → wrong/skip
+      if (beta > TILT_DOWN_THRESHOLD) {
         handleTilt('down');
-      } else if (beta > TILT_UP_THRESHOLD) {
+      } else if (beta < TILT_UP_THRESHOLD) {
         handleTilt('up');
       }
     };

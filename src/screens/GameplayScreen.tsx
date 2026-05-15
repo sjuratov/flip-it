@@ -62,7 +62,7 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
     [handleAnswer, feedback],
   );
 
-  const { needsPermission, permissionGranted, requestPermission, triggerManual } =
+  const { triggerManual } =
     useTilt({
       enabled: gameStarted && !isExpired && feedback === null,
       onTilt: handleTilt,
@@ -95,11 +95,6 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
       <div className="gameplay-timer">{formatTime(timeLeft)}</div>
 
       <div className="gameplay-phrase-container">
-        {needsPermission && !permissionGranted && (
-          <button className="btn btn-primary" onClick={requestPermission}>
-            Enable Tilt Controls
-          </button>
-        )}
         <div className="gameplay-phrase" key={currentIndex}>
           {feedback === 'correct'
             ? '✅'
@@ -123,7 +118,7 @@ export function GameplayScreen({ config, onFinish }: GameplayScreenProps) {
         </span>
       </div>
 
-      {/* Desktop fallback buttons */}
+      {/* Manual answer buttons */}
       <div className="gameplay-buttons">
         <button
           className="btn btn-correct"
