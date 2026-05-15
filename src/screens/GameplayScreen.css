@@ -1,0 +1,107 @@
+.gameplay-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 100dvh;
+  padding: 2rem 1.5rem;
+  transition: background-color 0.3s;
+}
+
+.gameplay-screen.gameplay-correct {
+  background-color: var(--color-correct) !important;
+}
+
+.gameplay-screen.gameplay-wrong {
+  background-color: var(--color-wrong) !important;
+}
+
+.gameplay-timer {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: var(--color-surface);
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.gameplay-phrase-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.gameplay-phrase {
+  font-size: clamp(2rem, 8vw, 4rem);
+  font-weight: 900;
+  line-height: 1.2;
+  animation: slide-in 0.3s ease-out;
+  max-width: 90vw;
+  word-wrap: break-word;
+}
+
+@keyframes slide-in {
+  0% { transform: translateX(50px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+.gameplay-hint {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.gameplay-score {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.score-correct {
+  color: var(--color-correct);
+}
+
+.score-wrong {
+  color: var(--color-wrong);
+}
+
+.gameplay-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-correct {
+  background: var(--color-correct) !important;
+  color: white !important;
+  border: none !important;
+  padding: 1rem 2rem !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  cursor: pointer;
+}
+
+.btn-wrong {
+  background: var(--color-wrong) !important;
+  color: white !important;
+  border: none !important;
+  padding: 1rem 2rem !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  cursor: pointer;
+}
+
+.btn-correct:disabled,
+.btn-wrong:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

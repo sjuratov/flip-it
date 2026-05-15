@@ -1,0 +1,51 @@
+.ready-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.ready-instruction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.ready-phone-icon {
+  font-size: 4rem;
+  animation: tilt-phone 1.5s ease-in-out infinite;
+}
+
+@keyframes tilt-phone {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-90deg); }
+}
+
+.ready-instruction p {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.ready-hint {
+  color: var(--color-text-muted);
+  font-size: 1rem !important;
+  font-weight: 400 !important;
+}
+
+.ready-countdown {
+  font-size: 8rem;
+  font-weight: 900;
+  color: var(--color-primary);
+  animation: pulse-in 0.5s ease-out;
+}
+
+@keyframes pulse-in {
+  0% { transform: scale(2); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
